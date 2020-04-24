@@ -1,0 +1,70 @@
+---
+title: "Nick's Analysis"
+author: "Nick Matthews"
+date: "4/23/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE}
+# Normal libraries
+library(ggplot2)
+theme_set(theme_minimal())
+library(dplyr)
+library(tidyr)
+# Libraries for mapping
+library(maps)
+library(ggmap)
+library(RColorBrewer)
+library(here)
+library(patchwork)
+```
+
+#### Reading in data
+```{r warning=FALSE}
+crash <- readr::read_csv('crash2016.csv')
+
+crash <- crash %>%
+  mutate(DANGEROUS_TO_DRIVE = (ROADWAY_SURFACE_COND != "DRY"))
+
+crash_with_injury <- crash %>%
+  filter(INJURIES_TOTAL > 0)
+
+crash_with_injury_winter <- crash_with_injury %>%
+  filter(Month == 12 | Month < 3)
+
+crash_with_injury_summer <- crash_with_injury %>%
+  filter(Month < 9 & Month > 5)
+```
+
+#### Plotting Every Crash
+```{r warning=FALSE, message=FALSE}
+counties <- map_data('county')
+
+chicago_box <- c(left = -87.936287,
+            bottom = 41.679835,
+            right = -87.447052,
+            top = 42.000835)
+chicago_map <- get_stamenmap(chicago_box, zoom = 12)
+
+chicago_map %>%
+  ggmap() +
+  geom_point(data = crash_with_injury_winter, aes(x=LONGITUDE,y=LATITUDE),size=0.2)
+
+chicago_map %>%
+  ggmap() +
+  geom_point(data = crash_with_injury_summer, aes(x=LONGITUDE,y=LATITUDE),size=0.2)
+
+chicago_map %>%
+  ggmap() +
+  geom_point(data = crash_with_injury, aes(x=LONGITUDE,y=LATITUDE,color=DANGEROUS_TO_DRIVE),size=0.2)
+
+chicago_map %>%
+  ggmap() +
+  geom_point(data = crash_with_injury, aes(x=LONGITUDE,y=LATITUDE),size=0.2) +
+  geom_density2d(data = crash_with_injury, aes(x=LONGITUDE,y=LATITUDE), size=0.5)
+
+```
