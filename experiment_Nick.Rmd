@@ -1,0 +1,26 @@
+---
+title: "Project Proposal"
+author: "Michael Zaino-mzaino16 | Nick Matthews-nickmatthews713 | Meredith Tucker-mltucker2001 | Jian Lee-jiankailee"
+date: "4/5/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### **Project Coordinator**: Nick Matthews-nickmatthews713
+
+### Dataset Link  
+https://data.world/cityofchicago/85ca-t3if
+
+### Dataset Overview  
+ Cars are one of the greatest innovations of the 20th century. But with so much advancement, we still cannot factor out some basic error. This includes speeding, not looking at the road, not listening to basic road rules such as stop signs and traffic lights, etc. This causes accidents and crashes that no one should have to go through. But like anything, is there a trend to see what type of crashes are happening? Do more accidents happen when there are road defects? How much does weather affect the rate of crashes? Do accidents happen more by intersections or on a highway or on a country road? What time of year causes the most accidents? We intend to explore this dataset to see if we can answer some of these questions.
+
+Our dataset includes many categorical variables. We have the date of the accident, time of the accident, the weather during the accident, and many other variables that describe the occurrence. We also have the quatitative variables such as the number of passengers. ANother good variable is the longitude and latitude of the accident to give a precise location as to where the accident occured.
+
+This dataset was obtained from Kaggle. There seems to be some missing data. This is because some accidents are more serious than others needing more information. So, some data cleaning and manipulation will be needed going forward.
+
+
+
+
