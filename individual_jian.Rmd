@@ -1,0 +1,35 @@
+---
+title: "individual_jian"
+author: "Jian Kai Lee;jiankailee"
+date: "4/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+```
+
+```{r fig.width=9, fig.height=6}
+# Factor and second factor causing the crash, what are the most common?
+# The percentage of crash type  and report type of data 
+
+crash <- readr::read_csv('crash2016.csv')
+#crash
+unique(crash$PRIM_CONTRIBUTORY_CAUSE)
+
+#temp<-crash%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%summarise(count=n())
+#temp
+
+crash<-crash%>%filter(PRIM_CONTRIBUTORY_CAUSE!="UNABLE TO DETERMINE")
+
+crash%>%ggplot(aes(x=PRIM_CONTRIBUTORY_CAUSE))+geom_histogram(stat = "count")+coord_flip()+theme(axis.text.y = element_text(size = 6))+xlab("primary cause")+ylab("number of accident")+ggtitle("primary cause of accident in 2016")
+#crash%>%ggplot(aes(x=PRIM_CONTRIBUTORY_CAUSE))+geom_histogram(stat = "count")
+
+crash%>%ggplot(aes(x=SEC_CONTRIBUTORY_CAUSE))+geom_histogram(stat = "count")+coord_flip()+theme(axis.text.y = element_text(size = 6))+xlab("secondary cause")+ylab("number of accident")+ggtitle("secondary cause of accident in 2016")
+
+crash%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%ggplot(aes(x=PRIM_CONTRIBUTORY_CAUSE,y=INJURIES_TOTAL))+geom_bar(stat="identity")+coord_flip()+theme(axis.text.y = element_text(size = 6))+xlab("primary cause")+ylab("Total Injuries")+ggtitle("Total Injuries in each primary cause 2016")
+
+crash%>%ggplot(aes(x=PRIM_CONTRIBUTORY_CAUSE,fill=LIGHTING_CONDITION))+geom_bar(stat = "count",position = "fill")+coord_flip()+theme(axis.text.y = element_text(size = 6))+theme(legend.position = "top",legend.text = element_text(size = 6),legend.title = element_text(size = 6))+xlab("primary cause")+ylab("ratio of lighting condtion in cause")+ggtitle("The ratio of lighting condition in each primary causes")
+```
