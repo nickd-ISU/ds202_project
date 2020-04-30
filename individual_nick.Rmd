@@ -32,18 +32,19 @@ library(extrafont)
 ```{r warning=FALSE, message=FALSE}
 crash <- readr::read_csv('crash2016.csv')
 
+months <- c("January","February","March","April","May","June","July",
+            "August","September","October","November","December")
+
 crash <- crash %>%
-  mutate(DANGEROUS_TO_DRIVE = (ROADWAY_SURFACE_COND != "DRY")) %>%
+  mutate(DANGEROUS_TO_DRIVE = (ROADWAY_SURFACE_COND != "DRY"),
+         MONTH_NAME = months[CRASH_MONTH]) %>%
   rename("Road Conditions" = ROADWAY_SURFACE_COND)
 
 crash_with_injury <- crash %>%
   filter(INJURIES_TOTAL > 0)
 
-crash_with_injury_winter <- crash_with_injury %>%
-  filter(Month == 12 | Month < 3)
-
-crash_with_injury_summer <- crash_with_injury %>%
-  filter(Month < 9 & Month > 5)
+crash_no_injury <- crash %>%
+  filter(INJURIES_TOTAL == 0)
 ```
 
 #### Plotting Every Crash
@@ -67,22 +68,33 @@ chicago_map %>%
 
 ```
 
-```{r warning=FALSE, message=FALSE, fig.width=10, fig.height=6}
+```{r warning=FALSE, message=FALSE}
 downtown_box <- c(left = -87.656248,
-            bottom = 41.862511,
-            right = -87.596938,
-            top = 41.901527)
+                  bottom = 41.862511,
+                  right = -87.596938,
+                  top = 41.901527)
 downtown_map <- get_stamenmap(downtown_box, zoom = 14)
 
+downtown_stadium_box <- c(left = -87.712759,
+                          bottom = 41.862511,
+                          right = -87.596938,
+                          top = 41.957135)
+downtown_stadium_map <- get_stamenmap(downtown_stadium_box, zoom = 14)
+
+```
+
+
+```{r fig.height=6, fig.width=10, message=FALSE, warning=FALSE}
 # Make pretty plot
-downtown_crash_map <- downtown_map %>%
+downtown_crash_map <- downtown_stadium_map %>%
   ggmap() +
   ggtitle("Car Crashes in Downtown Chicago", 
           subtitle = "An interactive map") + 
-  scale_size(range = c(2,10)) +
+  scale_size(range = c(1.5,12)) +
   geom_point(data = crash_with_injury,
              aes(x=LONGITUDE,
                  y=LATITUDE,
+                 size=INJURIES_TOTAL,
                  fill=`Road Conditions`,
                  text = paste(
                    "Street: ", STREET_NAME, "\n",
@@ -91,13 +103,12 @@ downtown_crash_map <- downtown_map %>%
                    "Road Condition: ", `Road Conditions`, "\n",
                    "Injuries: ", INJURIES_TOTAL,
                    sep = ""),
-                 size=INJURIES_TOTAL,alpha=0.94),
+                 alpha=0.94),
              colour="black",
              pch=21) +
   theme(axis.title = element_blank(),
         legend.title = element_blank(),
         legend.position = c(1,1),
-        legend.background = element_rect(fill = "#CFCFCF"),
         plot.title = element_text(family = "Arial Black",
                                   hjust = 0.5,
                                   size = 20,
@@ -109,7 +120,62 @@ ggplotly(downtown_crash_map, tooltip = "text") %>%
          title=list(text=paste0('Car Crashes in Downtown Chicago',
                                     '<br>',
                                     '<sup>',
-                                    'An interactive map of crashes in 2016',
-                                    '</sup>')))
+                                    'An interactive map of crashes with injury in 2016',
+                                    '</sup>')),
+         legend = list(itemclick="toggle",
+                       xanchor="auto",
+                       yanchor="auto",
+                       borderwidth = "3",
+                       bordercolor = "#79797D",
+                       itemsizing = "constant",
+                       title = list(text=paste0('Road Conditions'),
+                                    family="Arial Black")))
+```
 
+```{r fig.height=6, fig.width=10, message=FALSE, warning=FALSE}
+# Make pretty plot
+downtown_crash_map_months <- chicago_map %>%
+  ggmap() +
+  ggtitle("Car Crashes in Downtown Chicago", 
+          subtitle = "An interactive map") + 
+  scale_size(range = c(1.5,12)) +
+  geom_point(data = crash_with_injury,
+             aes(x=LONGITUDE,
+                 y=LATITUDE,
+                 fill=MONTH_NAME,
+                 size=INJURIES_TOTAL,
+                 text = paste(
+                   "Street: ", STREET_NAME, "\n",
+                   "Date: ", date, "\n",
+                   "Damage: ", DAMAGE, "\n",
+                   "Road Condition: ", `Road Conditions`, "\n",
+                   "Injuries: ", INJURIES_TOTAL,
+                   sep = ""),
+                 alpha=0.94),
+             colour="black",
+             pch=21) +
+  theme(axis.title = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(1,1),
+        plot.title = element_text(family = "Arial Black",
+                                  hjust = 0.5,
+                                  size = 20,
+                                  colour = "#5C5C5C"))
+
+# Plot graph and make interactive with plotly
+ggplotly(downtown_crash_map_months, tooltip = "text") %>%
+  layout(hoverlabel=list(bgcolor="lightblue", alpha=0.8),
+         title=list(text=paste0('Car Crashes in Downtown Chicago',
+                                    '<br>',
+                                    '<sup>',
+                                    'An interactive map of crashes with injury in 2016',
+                                    '</sup>')),
+         legend = list(itemclick="toggle",
+                       xanchor="auto",
+                       yanchor="auto",
+                       borderwidth = "3",
+                       bordercolor = "#79797D",
+                       itemsizing = "constant",
+                       title = list(text=paste0('Month(toggle)'),
+                                    family="Arial Black")))
 ```
