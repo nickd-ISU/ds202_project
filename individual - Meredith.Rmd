@@ -1,0 +1,297 @@
+---
+title: 'Final Project: Meredith'
+author: "Meredith Tucker"
+date: "4/25/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(plotly)
+library(lubridate)
+library(RColorBrewer)
+
+crash <- readr::read_csv("crash2016.csv")
+
+
+```
+
+
+### How does weather play into the factor of accidents?
+
+
+```{r}
+#Data Contributed to Weather Related Causes
+try <- crash %>% select('WEATHER_CONDITION', 'PRIM_CONTRIBUTORY_CAUSE', 'SEC_CONTRIBUTORY_CAUSE', 'ROADWAY_SURFACE_COND', 'LIGHTING_CONDITION', 'CRASH_TYPE', 'DAMAGE', 'INTERSECTION_RELATED_I', 'NUM_UNITS', 'INJURIES_TOTAL', 'POSTED_SPEED_LIMIT', 'CRASH_DATE', 'Month') %>%
+  filter(PRIM_CONTRIBUTORY_CAUSE =='WEATHER'| PRIM_CONTRIBUTORY_CAUSE =='EXCEEDING SAFE SPEED FOR CONDITIONS' | SEC_CONTRIBUTORY_CAUSE=='WEATHER' | SEC_CONTRIBUTORY_CAUSE=='EXCEEDING SAFE SPEED FOR CONDITIONS')
+
+try
+```
+
+```{r}
+
+newthing <- crash %>% select('WEATHER_CONDITION', 'PRIM_CONTRIBUTORY_CAUSE', 'SEC_CONTRIBUTORY_CAUSE', 'ROADWAY_SURFACE_COND', 'LIGHTING_CONDITION', 'Month', 'CRASH_DATE')
+
+newthing$CRASH_DATE <- as.Date(mdy_hm(newthing$CRASH_DATE))
+
+newthing <- newthing %>% 
+  mutate(Month = month(Month, label=TRUE))
+
+
+idea <- newthing %>% group_by(Month, WEATHER_CONDITION) %>% summarize(Count = n()) %>% arrange(Month)
+idea
+```
+
+
+
+```{r}
+
+linmonth <- idea %>%
+  ggplot(aes(x=Month, y=Count, group=1)) +
+  geom_line(aes(color=WEATHER_CONDITION), show.legend=FALSE) +
+  geom_point(aes(color=WEATHER_CONDITION), show.legend=FALSE) +
+  scale_color_brewer(palette='Set1')+
+  facet_wrap(~WEATHER_CONDITION) +
+  theme(axis.text.x=element_text(angle=45, hjust=1))
+
+linmonth
+
+
+linmonth1 <- idea %>%
+  ggplot(aes(x=Month, y=Count, group=WEATHER_CONDITION)) +
+  geom_line(aes(color=WEATHER_CONDITION), show.legend=FALSE) +
+  ggtitle('All Accident Weather by Month') +
+  geom_point(aes(color=WEATHER_CONDITION)) +
+  scale_color_brewer(palette='Set1')+
+  theme(axis.text.x=element_text(angle=45, hjust=1))
+
+linmonth1
+
+
+```
+
+
+```{r}
+trynew <- try %>% select('WEATHER_CONDITION', 'PRIM_CONTRIBUTORY_CAUSE', 'SEC_CONTRIBUTORY_CAUSE', 'ROADWAY_SURFACE_COND', 'LIGHTING_CONDITION', 'Month', 'CRASH_DATE')
+
+
+trynew <- trynew %>% 
+  mutate(Month = month(Month, label=TRUE))
+
+
+tryidea <- trynew %>% group_by(Month, WEATHER_CONDITION) %>% summarize(Count = n()) %>% arrange(Month)
+tryidea
+```
+
+
+
+
+```{r}
+
+trylinmonth <- tryidea %>%
+  ggplot(aes(x=Month, y=Count, group=1)) +
+  geom_line(aes(color=WEATHER_CONDITION), show.legend=FALSE) +
+  geom_point(aes(color=WEATHER_CONDITION), show.legend=FALSE) +
+  scale_color_brewer(palette='Set1')+
+  facet_wrap(~WEATHER_CONDITION) +
+  theme(axis.text.x=element_text(angle=45, hjust=1))
+
+trylinmonth
+
+trylinmonth1 <- tryidea %>%
+  ggplot(aes(x=Month, y=Count, group=WEATHER_CONDITION)) +
+  geom_line(aes(color=WEATHER_CONDITION), show.legend=FALSE) +
+  ggtitle('Related Accident Weather by Month') +
+  geom_point(aes(color=WEATHER_CONDITION)) +
+  scale_color_brewer(palette='Set1')+
+  theme(axis.text.x=element_text(angle=45, hjust=1))
+
+trylinmonth1
+```
+
+
+
+
+
+## Organized Data with Summarizing
+
+
+```{r}
+#Data Contributed to Weather Related Causes
+try <- crash %>% select('WEATHER_CONDITION', 'PRIM_CONTRIBUTORY_CAUSE', 'SEC_CONTRIBUTORY_CAUSE', 'ROADWAY_SURFACE_COND', 'LIGHTING_CONDITION', 'CRASH_TYPE', 'DAMAGE', 'INTERSECTION_RELATED_I', 'NUM_UNITS', 'INJURIES_TOTAL', 'POSTED_SPEED_LIMIT', 'CRASH_DATE', 'Month') %>%
+  filter(PRIM_CONTRIBUTORY_CAUSE =='WEATHER'| PRIM_CONTRIBUTORY_CAUSE =='EXCEEDING SAFE SPEED FOR CONDITIONS' | SEC_CONTRIBUTORY_CAUSE=='WEATHER' | SEC_CONTRIBUTORY_CAUSE=='EXCEEDING SAFE SPEED FOR CONDITIONS')
+
+try
+```
+
+
+```{r}
+# Weather frequency in all accident data
+allweath <- ggplot(crash, aes(x=WEATHER_CONDITION, fill=WEATHER_CONDITION)) +
+  geom_bar(show.legend=FALSE) +
+  geom_text(aes(label=stat(count)), stat='count', vjust=-0.25) +
+  ggtitle('Weather Conditions for All Accidents') +
+  ylab('Count') + xlab('Weather Condition') +
+  theme(axis.text.x=element_text(angle=30, hjust=1))
+
+allweath
+
+# Frequency of Weather Type for weather related Accidents
+
+tryweath <- try %>%
+  ggplot(aes(x=WEATHER_CONDITION, fill=WEATHER_CONDITION)) +
+  geom_bar(show.legend=FALSE) +
+  geom_text( aes(label=stat(count)), stat='count', vjust=-0.25) +
+  ggtitle('Weather Conditions for Weather Related Causes') +
+  xlab('Weather') +
+  ylab('Count') +
+  theme(axis.text.x=element_text(angle=30, hjust=1))
+  
+
+tryweath
+
+
+```
+
+
+
+
+```{r}
+
+# Lighting Conditions for All Accidents
+
+alllight <- crash %>%
+  ggplot(aes(x=LIGHTING_CONDITION, fill=LIGHTING_CONDITION)) +
+  geom_bar(show.legend=FALSE) + geom_text(aes(label=stat(count)), stat='count', vjust=-0.25) +
+  ggtitle('Lighting Conditions for All Accidents') +
+  xlab('Lighting') +
+  ylab('Count') +
+  theme(axis.text.x=element_text(angle=30, hjust=1))
+alllight
+
+
+# Lighting Conditions for Weather Related Causes
+relatlight <- try %>%
+  ggplot(aes(x=LIGHTING_CONDITION, fill=LIGHTING_CONDITION)) +
+  geom_bar(show.legend=FALSE) +
+  geom_text(aes(label=stat(count)), stat='count', vjust=-0.25) +
+  ggtitle('Lighting Conditions for Weather Related Accidents') +
+  xlab('Lighting') +
+  ylab('Count') +
+  theme(axis.text.x=element_text(angle=30, hjust=1))
+
+relatlight
+```
+
+
+```{r}
+# Road Surface Conditions for All Accidents
+
+allroad <- crash %>% 
+  ggplot(aes(x=ROADWAY_SURFACE_COND, fill=ROADWAY_SURFACE_COND)) +
+  geom_bar(show.legend=FALSE) +
+  geom_text(aes(label=stat(count)), stat='count', vjust=-0.25) +
+  ggtitle('Roadway Conditions for All Accidents') +
+  xlab('Roadway Condition') +
+  ylab('Count') +
+  theme(axis.text.x=element_text(angle=30, hjust=1))
+allroad
+
+
+# Roadway surface conditions for weather related accidents
+tryroad <- try %>%
+  ggplot(aes(x=ROADWAY_SURFACE_COND, fill=ROADWAY_SURFACE_COND)) +
+  geom_bar(show.legend=FALSE) +
+  geom_text(aes(label=stat(count)), stat='count', vjust=-0.25) +
+  ggtitle('Roadway Conditions for Weather Related Causes') +
+  xlab('Roadway Condition') +
+  ylab('Count') +
+  theme(axis.text.x=element_text(angle=30, hjust=1))
+tryroad
+
+```
+
+
+
+
+```{r}
+# Weather and Roadway Condition
+
+allweathroad <- crash %>% 
+  ggplot(aes(x=WEATHER_CONDITION, fill=ROADWAY_SURFACE_COND), label=stat(count)) + geom_bar() + ggtitle('Weather and Road Surface Condition for All Accidents') + xlab('Weather') + ylab('Count') + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+allweathroad
+
+
+tryweathroad <- try %>% 
+  ggplot(aes(x=WEATHER_CONDITION, fill=ROADWAY_SURFACE_COND), label=stat(count)) + geom_bar() + ggtitle('Weather and Road Surface Condition') + xlab('Weather') + ylab('Count') + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+tryweathroad
+
+
+```
+
+
+```{r}
+# Percentages of Weather Condition
+
+countallweath <- crash %>% group_by(WEATHER_CONDITION) %>% summarize(Count_All = n())
+countallweath
+
+counttryweath <- try %>% group_by(WEATHER_CONDITION) %>% summarize(Count_Rel = n())
+counttryweath
+
+weathper <- merge(countallweath, counttryweath, by='WEATHER_CONDITION')
+
+
+weatherper <- weathper %>% 
+  group_by(WEATHER_CONDITION) %>% 
+  mutate(Percentage = Count_Rel/Count_All *100)
+weatherper
+```
+
+
+```{r}
+# Percentages of Lighting Condition
+
+countalllight <- crash %>% group_by(LIGHTING_CONDITION) %>% summarize(Count_All = n())
+countalllight
+
+counttrylight <- try %>% group_by(LIGHTING_CONDITION) %>% summarize(Count_Rel = n())
+counttrylight
+
+ligper <- merge(countalllight, counttrylight, by='LIGHTING_CONDITION')
+
+
+lightper <- ligper %>% 
+  group_by(LIGHTING_CONDITION) %>% 
+  mutate(Percentage = Count_Rel/Count_All *100)
+lightper
+```
+
+
+
+```{r}
+# Percentages of Roadway Surface Condition
+
+countallroad <- crash %>% group_by(ROADWAY_SURFACE_COND) %>% summarize(Count_All = n())
+countallroad
+
+
+counttryroad <- try %>% group_by(ROADWAY_SURFACE_COND) %>% summarize(Count_Rel = n())
+counttryroad
+
+roadper <- merge(countallroad, counttryroad, by='ROADWAY_SURFACE_COND')
+
+
+roadwayper <- roadper %>% 
+  group_by(ROADWAY_SURFACE_COND) %>% 
+  mutate(Percentage = Count_Rel/Count_All *100)
+roadwayper
+```
+
