@@ -1,6 +1,6 @@
 ---
 title: "Traffic in Chicago"
-author: "Nick Matthews / Michael Zaino / Meredith Tucker / Jian Lee"
+author: "Jian Lee / Nick Matthews / Meredith Tucker / Mike Zaino"
 date: "5/4/2020"
 output: html_document
 ---
@@ -15,6 +15,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(tidyverse)
+library(lubridate)
 # Libraries for mapping
 library(maps)
 library(ggmap)
@@ -22,6 +23,7 @@ library(ggmap)
 library(plotly)
 library(htmlwidgets)
 library(extrafont)
+crash <- readr::read_csv('crash2016.csv')
 ```
 
 ### Introduction  
@@ -33,19 +35,69 @@ library(extrafont)
 ### Days with Most Accidents in Chicago  
 The first goal was to find the days with the most amount of accidents. This was achieved by grouping the dataset by date. Since we changed the date into the month, day, and year, we had to group by all three of those variables. From there, we totaled each entry with a given date. 
 
-----< Insert your stuff here - Mike>------------
+```{r}
+crash %>% 
+  group_by(Month, Day, Year) %>% 
+  summarise(n=n()) %>% 
+  arrange(desc(n)) %>% 
+  head(n=15)
+```
 
 From these, we can see a pattern. All of these dates with the most accidents were during Winter months. 
 The next thing to find was what factors were causing many accidents during these days. Instead of looking at the dataset, we decided to research what was going on during these days around the accident. We looked at sports games, the weather, and anything we believed that could affect traffic to cause more accidents. 
 
-----< Insert your stuff here - Mike>------------
+```{r}
+ table <-  data.frame('Date' = c('12/19/16', '12/20/16', '11/23/16', '11/24/16', '12/16/16', '12/14/16'),
+             'Sporting Event' = c('Pistons vs Bulls','Senators vs Blackhawks', 'Predators vs Blackhawks','Spurs vs Bulls', 'Islanders vs Blackhawks', 'NA'),
+             'Weather Event' = c('High of -6°F', 'High of 0°F', 'Rain all Day', 'Rain all Day', 'Thick Fog', '2 inches of Snow'),
+             'Other Events' = c('12/18/16 Wind Chill Advisory First week out for Chicago Public Schools', '12/18/16 Wind Chill Advisory First week out for Chicago Public Schools', '11/24/16, Thanksgiving Day Parade', 'NA', 'NA', '2 inches of snow day before'))
+  
+table
+```
 
 |      Searching for specific events on a given day was made easier because we were trying to find events specifically in the Chicago area. Looking at the table above, we can see that on all of these days, there was a sporting event taking place. Because the Bulls and the Blackhawks play in the same stadium, we can pinpoint their locations to the United Center. Next, is the type of weather that was going on during those days. We wanted to get as specific as possible. During the two most populous days, the temperature was at or below 0°F for the majority of the day with a wind chill advisory. On top of that, public schools in Chicago were on their first week of Winter break putting more people on the road and traveling. Next, on November 23rd was the day before the Thanksgiving Day Parade. We believe that there could be more accidents on this day because Chicago has to close down certain roads for the parade to take place. As a result of these closures, more cars will be on fewer roads causing more traffic which could lead to a higher chance of an accident occurring. Finally, four of the top six days listed are all within a week from each other. The cause behind this observation is most likely the weather. However, another factor could be the Holiday season. Around December, schools and businesses are closing for Seasonal Holiday breaks, leading to an increase in travel. The most popular mode of transportation in the United States is driving. Chicago is no exception. With more cars on the road, there is going to be a higher chance of risk of accidents.
 
 ### Impact of Weather on the Accidents Occurring in Chicago  
 |      When analyzing this data set in regards to the effect of weather, it was necessary to distinguish the accidents that listed weather-related factors as a primary or secondary cause. The data was then reduced to the accidents that listed the causes of the accident as either weather or exceeding safe speed for conditions. Accidents that were contributed to weather-related causes accounted for 2.79% of all accidents that occurred. While overall, weather-related factors may seem to have a relatively insignificant impact on the cause of accidents, the weather and roadway surface conditions provide greater insight. The cause of 41.2% of accidents in windy conditions was listed to be weather-related. For accidents in snowy conditions, 25.6% of accidents listed weather as a cause. Accidents occurring in conditions of hail and sleet attributed 20.0% of accidents to weather. The condition of the roadway surface also showed a relation to the cause of accidents. The accidents with icy road conditions showed that 41.5% of these accidents were due to weather-related factors. The number of accidents per weather condition was plotted by month to show the influence of the season.  
 
-----< Insert your stuff here - Meredith>------------
+
+```{r}
+newthing <- crash %>% dplyr::select('WEATHER_CONDITION', 'PRIM_CONTRIBUTORY_CAUSE', 'SEC_CONTRIBUTORY_CAUSE', 'ROADWAY_SURFACE_COND', 'LIGHTING_CONDITION', 'Month', 'CRASH_DATE')
+newthing$CRASH_DATE <- as.Date(mdy_hm(newthing$CRASH_DATE))
+newthing <- newthing %>% 
+  mutate(Month = month(Month, label=TRUE))
+idea <- newthing %>% group_by(Month, WEATHER_CONDITION) %>% summarize(Count = n()) %>% arrange(Month)
+
+linmonth1 <- idea %>%
+  ggplot(aes(x=Month, y=Count, group=WEATHER_CONDITION)) +
+  geom_line(aes(color=WEATHER_CONDITION), show.legend=FALSE) +
+  ggtitle('All Accident Weather by Month') +
+  geom_point(aes(color=WEATHER_CONDITION)) +
+  scale_color_brewer(palette='Set1')+
+  theme(axis.text.x=element_text(angle=45, hjust=1))
+
+linmonth1
+```
+
+```{r}
+try <- crash %>% select('WEATHER_CONDITION', 'PRIM_CONTRIBUTORY_CAUSE', 'SEC_CONTRIBUTORY_CAUSE', 'ROADWAY_SURFACE_COND', 'LIGHTING_CONDITION', 'CRASH_TYPE', 'DAMAGE', 'INTERSECTION_RELATED_I', 'NUM_UNITS', 'INJURIES_TOTAL', 'POSTED_SPEED_LIMIT', 'CRASH_DATE', 'Month') %>%
+  filter(PRIM_CONTRIBUTORY_CAUSE =='WEATHER'| PRIM_CONTRIBUTORY_CAUSE =='EXCEEDING SAFE SPEED FOR CONDITIONS' | SEC_CONTRIBUTORY_CAUSE=='WEATHER' | SEC_CONTRIBUTORY_CAUSE=='EXCEEDING SAFE SPEED FOR CONDITIONS')
+
+trynew <- try %>% dplyr::select('WEATHER_CONDITION', 'PRIM_CONTRIBUTORY_CAUSE', 'SEC_CONTRIBUTORY_CAUSE', 'ROADWAY_SURFACE_COND', 'LIGHTING_CONDITION', 'Month', 'CRASH_DATE')
+trynew <- trynew %>% 
+  mutate(Month = month(Month, label=TRUE))
+tryidea <- trynew %>% group_by(Month, WEATHER_CONDITION) %>% summarize(Count = n()) %>% arrange(Month)
+
+trylinmonth1 <- tryidea %>%
+  ggplot(aes(x=Month, y=Count, group=WEATHER_CONDITION)) +
+  geom_line(aes(color=WEATHER_CONDITION), show.legend=FALSE) +
+  ggtitle('Related Accident Weather by Month') +
+  geom_point(aes(color=WEATHER_CONDITION)) +
+  scale_color_brewer(palette='Set1')+
+  theme(axis.text.x=element_text(angle=45, hjust=1))
+
+trylinmonth1
+```
 
 |      The most notable difference between the graph concerning all accidents and accidents due to weather-related causes were the accidents that occurred on clear days. The amount of accidents that occurred in clear weather is reduced dramatically in the data relating to weather conditions. However, it still appears as one of the top three weather conditions for accidents due to weather conditions. The calculations as described above showed that 0.92% of accidents on clear days were contributed to weather-related conditions. This visual shows that although the percentage is small, the amount is not non-negligible with regard to the number of accidents occurring. The plots of the weather conditions that had large percentages above maintained a similar path in both graphs. The accidents that occurred in rain weather conditions consisted of 13.7% of the accidents to be caused by weather. The plots of the rain data appear to be similar but show several differences. The graph of all accidents shows a small peak in April, however, in the weather-related accidents graph this peak occurs in May. 
 
@@ -53,7 +105,6 @@ The next thing to find was what factors were causing many accidents during these
 |      In the dataset, it provides the primary causes and secondary causes of the accidents in Chicago. It is important to analyze the primary causes and secondary causes contributing to the accidents. There are 36 factors in the primary and secondary causes columns in the dataset. As displayed by the barplot, the most common primary cause is following too closely with 5708 out of the total 24801 accidents. The percent of this cause in accidents is 23%. Therefore, following too closely is the primary cause of accidents in urban areas. The second most common cause resulting in 17.04% of accidents is a result of failing to yield the right of way.  The third cause is improper overtaking or passing. There are 2420 accidents related to improper overtaking or passing.  
 
 ```{r fig.width=14, fig.height=9}
-crash <- readr::read_csv('crash2016.csv')
 crash<-crash%>%filter(PRIM_CONTRIBUTORY_CAUSE!="UNABLE TO DETERMINE")
 crash<-crash%>%filter(PRIM_CONTRIBUTORY_CAUSE!="NOT APPLICABLE")
 crash%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%summarise(total=n())%>%
