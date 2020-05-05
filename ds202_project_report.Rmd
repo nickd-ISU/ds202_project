@@ -35,7 +35,7 @@ crash <- readr::read_csv('crash2016.csv')
 ### Days with Most Accidents in Chicago  
 The first goal was to find the days with the most amount of accidents. This was achieved by grouping the dataset by date. Since we changed the date into the month, day, and year, we had to group by all three of those variables. From there, we totaled each entry with a given date. 
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 crash %>% 
   group_by(Month, Day, Year) %>% 
   summarise(n=n()) %>% 
@@ -46,7 +46,7 @@ crash %>%
 From these, we can see a pattern. All of these dates with the most accidents were during Winter months. 
 The next thing to find was what factors were causing many accidents during these days. Instead of looking at the dataset, we decided to research what was going on during these days around the accident. We looked at sports games, the weather, and anything we believed that could affect traffic to cause more accidents. 
 
-```{r}
+```{r warning=FALSE, message=FALSE}
  table <-  data.frame('Date' = c('12/19/16', '12/20/16', '11/23/16', '11/24/16', '12/16/16', '12/14/16'),
              'Sporting Event' = c('Pistons vs Bulls','Senators vs Blackhawks', 'Predators vs Blackhawks','Spurs vs Bulls', 'Islanders vs Blackhawks', 'NA'),
              'Weather Event' = c('High of -6°F', 'High of 0°F', 'Rain all Day', 'Rain all Day', 'Thick Fog', '2 inches of Snow'),
@@ -61,7 +61,7 @@ table
 |      When analyzing this data set in regards to the effect of weather, it was necessary to distinguish the accidents that listed weather-related factors as a primary or secondary cause. The data was then reduced to the accidents that listed the causes of the accident as either weather or exceeding safe speed for conditions. Accidents that were contributed to weather-related causes accounted for 2.79% of all accidents that occurred. While overall, weather-related factors may seem to have a relatively insignificant impact on the cause of accidents, the weather and roadway surface conditions provide greater insight. The cause of 41.2% of accidents in windy conditions was listed to be weather-related. For accidents in snowy conditions, 25.6% of accidents listed weather as a cause. Accidents occurring in conditions of hail and sleet attributed 20.0% of accidents to weather. The condition of the roadway surface also showed a relation to the cause of accidents. The accidents with icy road conditions showed that 41.5% of these accidents were due to weather-related factors. The number of accidents per weather condition was plotted by month to show the influence of the season.  
 
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 newthing <- crash %>% dplyr::select('WEATHER_CONDITION', 'PRIM_CONTRIBUTORY_CAUSE', 'SEC_CONTRIBUTORY_CAUSE', 'ROADWAY_SURFACE_COND', 'LIGHTING_CONDITION', 'Month', 'CRASH_DATE')
 newthing$CRASH_DATE <- as.Date(mdy_hm(newthing$CRASH_DATE))
 newthing <- newthing %>% 
@@ -79,7 +79,7 @@ linmonth1 <- idea %>%
 linmonth1
 ```
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 try <- crash %>% select('WEATHER_CONDITION', 'PRIM_CONTRIBUTORY_CAUSE', 'SEC_CONTRIBUTORY_CAUSE', 'ROADWAY_SURFACE_COND', 'LIGHTING_CONDITION', 'CRASH_TYPE', 'DAMAGE', 'INTERSECTION_RELATED_I', 'NUM_UNITS', 'INJURIES_TOTAL', 'POSTED_SPEED_LIMIT', 'CRASH_DATE', 'Month') %>%
   filter(PRIM_CONTRIBUTORY_CAUSE =='WEATHER'| PRIM_CONTRIBUTORY_CAUSE =='EXCEEDING SAFE SPEED FOR CONDITIONS' | SEC_CONTRIBUTORY_CAUSE=='WEATHER' | SEC_CONTRIBUTORY_CAUSE=='EXCEEDING SAFE SPEED FOR CONDITIONS')
 
@@ -104,7 +104,7 @@ trylinmonth1
 ### Primary factor and Secondary Factor causing crashes 
 |      In the dataset, it provides the primary causes and secondary causes of the accidents in Chicago. It is important to analyze the primary causes and secondary causes contributing to the accidents. There are 36 factors in the primary and secondary causes columns in the dataset. As displayed by the barplot, the most common primary cause is following too closely with 5708 out of the total 24801 accidents. The percent of this cause in accidents is 23%. Therefore, following too closely is the primary cause of accidents in urban areas. The second most common cause resulting in 17.04% of accidents is a result of failing to yield the right of way.  The third cause is improper overtaking or passing. There are 2420 accidents related to improper overtaking or passing.  
 
-```{r fig.width=14, fig.height=9}
+```{r fig.width=14, fig.height=9, warning=FALSE, message=FALSE}
 crash<-crash%>%filter(PRIM_CONTRIBUTORY_CAUSE!="UNABLE TO DETERMINE")
 crash<-crash%>%filter(PRIM_CONTRIBUTORY_CAUSE!="NOT APPLICABLE")
 crash%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%summarise(total=n())%>%
@@ -113,7 +113,7 @@ crash%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%summarise(total=n())%>%
 
 |      In terms of secondary causes, the first three most common are following too closely, failing to reduce speed to avoid a crash, and driving skills/knowledge experience. There are 1475, 1474, and 1469 accidents related to them, respectively. 
 
-```{r fig.width=14, fig.height=9}
+```{r fig.width=14, fig.height=9, warning=FALSE, message=FALSE}
 crash<-crash%>%filter(SEC_CONTRIBUTORY_CAUSE!="UNABLE TO DETERMINE")
 crash<-crash%>%filter(SEC_CONTRIBUTORY_CAUSE!="NOT APPLICABLE")
 crash%>%group_by(SEC_CONTRIBUTORY_CAUSE)%>%summarise(total=n())%>%
@@ -122,14 +122,14 @@ crash%>%group_by(SEC_CONTRIBUTORY_CAUSE)%>%summarise(total=n())%>%
 
 |      When comparing the total injuries to the primary causes, the highest number of injuries occurred when the driver followed too closely. There were 270 injuries when the driver followed too closely. The second is failing to yield right of way. This caused 213 people to be injured. The third is disregarding traffic signals, resulting in 139 people injured. In an urban setting, like Chicago, following too closely while driving and failing to yield right of way result in higher chances to cause driver and passenger injuries. The percentage of these two causes in terms of the total number of injuries is 38.8%.  
 
-```{r fig.width=14, fig.height=9}
+```{r fig.width=14, fig.height=9, warning=FALSE, message=FALSE}
 crash<-crash%>%filter(!is.na(INJURIES_TOTAL))
 crash%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%summarise(total=sum(INJURIES_TOTAL))%>%ggplot(aes(x=reorder(PRIM_CONTRIBUTORY_CAUSE,total),y=total))+geom_bar(stat="identity")+coord_flip()+theme(axis.text.y = element_text(size = 10))+xlab("Primary Cause")+ylab("Number Injuries")+ggtitle("Total Injuries in Primary Causes 2016")+geom_text(aes(label=total),hjust=-0.05)
 ```
 
 |      The total of fatal injuries in Chicago 2016 is only 4 injuries. The rate of fatal injuries compared to total injuries in Chicago is 4/1245 = 0.3%. The rate of fatal injuries in terms of total accidents is relatively small. The causes of these are driving recklessly, carelessly or aggressive manner, improper overtaking, a distraction from inside the vehicle, and disregarding the traffic signal. Therefore, driving in Chicago has very low chances to cause fatal injuries.  
 
-```{r fig.width=12, fig.height=9}
+```{r fig.width=12, fig.height=9, warning=FALSE, message=FALSE}
 temp<-crash%>%filter(!is.na(INJURIES_FATAL))
 temp%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%summarise(total=sum(INJURIES_FATAL))%>%ggplot(aes(x=reorder(PRIM_CONTRIBUTORY_CAUSE,total),y=total))+geom_bar(stat="identity")+coord_flip()+theme(axis.text.y = element_text(size = 7))+xlab("Primary Cause")+ylab("Number of Injuries")+ggtitle("Total Fatal Injuries in Primary Causes 2016")
 
@@ -137,7 +137,7 @@ temp%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%summarise(total=sum(INJURIES_FATAL))%
 
 |      The line plot shown below displays the number of accidents of the top 3 primary causes occurring in a 24 hour period. When the hour is between 0-5, the number of accidents that are a result of the top 3 causes is the lowest in the day. There is no significant difference between these causes. When the hour is between 5-10, there is an increased number of accidents occurring. Following too closely causes the greatest increase. People tend to drive to work during these times when accidents occur. Between 15-17 hours is the highest number of accidents because during this time people are off their work and drive back to home. Therefore, the plot shows the accidents that occur when people go to work and off from work has an increasing pattern. 
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 temp<-crash%>%filter(PRIM_CONTRIBUTORY_CAUSE=="FOLLOWING TOO CLOSELY"|PRIM_CONTRIBUTORY_CAUSE=="FAILING TO YIELD RIGHT-OF-WAY"|PRIM_CONTRIBUTORY_CAUSE=="IMPROPER OVERTAKING/PASSING")
 temp%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%ggplot(aes(x=CRASH_HOUR,fill=PRIM_CONTRIBUTORY_CAUSE))+geom_line(stat="count",aes(color=PRIM_CONTRIBUTORY_CAUSE))+xlab("Hours")+ylab("Number of Accidents")+ggtitle("Top 3 Primary Causes of Accidents occured in Hours")+labs(color='Primary Causes')
 ```
