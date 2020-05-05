@@ -52,17 +52,44 @@ The next thing to find was what factors were causing many accidents during these
 ### Primary factor and Secondary Factor causing crashes 
 |      In the dataset, it provides the primary causes and secondary causes of the accidents in Chicago. It is important to analyze the primary causes and secondary causes contributing to the accidents. There are 36 factors in the primary and secondary causes columns in the dataset. As displayed by the barplot, the most common primary cause is following too closely with 5708 out of the total 24801 accidents. The percent of this cause in accidents is 23%. Therefore, following too closely is the primary cause of accidents in urban areas. The second most common cause resulting in 17.04% of accidents is a result of failing to yield the right of way.  The third cause is improper overtaking or passing. There are 2420 accidents related to improper overtaking or passing.  
 
-----< Insert your stuff here - Jian>------------
+```{r fig.width=14, fig.height=9}
+crash <- readr::read_csv('crash2016.csv')
+crash<-crash%>%filter(PRIM_CONTRIBUTORY_CAUSE!="UNABLE TO DETERMINE")
+crash<-crash%>%filter(PRIM_CONTRIBUTORY_CAUSE!="NOT APPLICABLE")
+crash%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%summarise(total=n())%>%
+  ggplot(aes(x=reorder(PRIM_CONTRIBUTORY_CAUSE,total), y=total))+geom_histogram(stat = "identity")+coord_flip()+theme(axis.text.y = element_text(size = 10))+xlab("Primary cause")+ylab("Number of Accidents")+ggtitle("Primary Cause of Accidents in 2016")+geom_text(aes(label=total),hjust=-0.01)
+```
+
+|      In terms of secondary causes, the first three most common are following too closely, failing to reduce speed to avoid a crash, and driving skills/knowledge experience. There are 1475, 1474, and 1469 accidents related to them, respectively. 
+
+```{r fig.width=14, fig.height=9}
+crash<-crash%>%filter(SEC_CONTRIBUTORY_CAUSE!="UNABLE TO DETERMINE")
+crash<-crash%>%filter(SEC_CONTRIBUTORY_CAUSE!="NOT APPLICABLE")
+crash%>%group_by(SEC_CONTRIBUTORY_CAUSE)%>%summarise(total=n())%>%
+  ggplot(aes(x=reorder(SEC_CONTRIBUTORY_CAUSE,total),y=total))+geom_histogram(stat = "identity")+coord_flip()+theme(axis.text.y = element_text(size = 10))+xlab("Secondary Causes")+ylab("Number of Accidents")+ggtitle("Secondary Causes of Accidents in 2016")+geom_text(aes(label=total),hjust=-0.01)
+```
 
 |      When comparing the total injuries to the primary causes, the highest number of injuries occurred when the driver followed too closely. There were 270 injuries when the driver followed too closely. The second is failing to yield right of way. This caused 213 people to be injured. The third is disregarding traffic signals, resulting in 139 people injured. In an urban setting, like Chicago, following too closely while driving and failing to yield right of way result in higher chances to cause driver and passenger injuries. The percentage of these two causes in terms of the total number of injuries is 38.8%.  
 
-----< Insert your stuff here - Jian>------------
+```{r fig.width=14, fig.height=9}
+crash<-crash%>%filter(!is.na(INJURIES_TOTAL))
+crash%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%summarise(total=sum(INJURIES_TOTAL))%>%ggplot(aes(x=reorder(PRIM_CONTRIBUTORY_CAUSE,total),y=total))+geom_bar(stat="identity")+coord_flip()+theme(axis.text.y = element_text(size = 10))+xlab("Primary Cause")+ylab("Number Injuries")+ggtitle("Total Injuries in Primary Causes 2016")+geom_text(aes(label=total),hjust=-0.05)
+```
 
 |      The total of fatal injuries in Chicago 2016 is only 4 injuries. The rate of fatal injuries compared to total injuries in Chicago is 4/1245 = 0.3%. The rate of fatal injuries in terms of total accidents is relatively small. The causes of these are driving recklessly, carelessly or aggressive manner, improper overtaking, a distraction from inside the vehicle, and disregarding the traffic signal. Therefore, driving in Chicago has very low chances to cause fatal injuries.  
 
-----< Insert your stuff here - Jian>------------
+```{r fig.width=12, fig.height=9}
+temp<-crash%>%filter(!is.na(INJURIES_FATAL))
+temp%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%summarise(total=sum(INJURIES_FATAL))%>%ggplot(aes(x=reorder(PRIM_CONTRIBUTORY_CAUSE,total),y=total))+geom_bar(stat="identity")+coord_flip()+theme(axis.text.y = element_text(size = 7))+xlab("Primary Cause")+ylab("Number of Injuries")+ggtitle("Total Fatal Injuries in Primary Causes 2016")
+
+```
 
 |      The line plot shown below displays the number of accidents of the top 3 primary causes occurring in a 24 hour period. When the hour is between 0-5, the number of accidents that are a result of the top 3 causes is the lowest in the day. There is no significant difference between these causes. When the hour is between 5-10, there is an increased number of accidents occurring. Following too closely causes the greatest increase. People tend to drive to work during these times when accidents occur. Between 15-17 hours is the highest number of accidents because during this time people are off their work and drive back to home. Therefore, the plot shows the accidents that occur when people go to work and off from work has an increasing pattern. 
+
+```{r}
+temp<-crash%>%filter(PRIM_CONTRIBUTORY_CAUSE=="FOLLOWING TOO CLOSELY"|PRIM_CONTRIBUTORY_CAUSE=="FAILING TO YIELD RIGHT-OF-WAY"|PRIM_CONTRIBUTORY_CAUSE=="IMPROPER OVERTAKING/PASSING")
+temp%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%ggplot(aes(x=CRASH_HOUR,fill=PRIM_CONTRIBUTORY_CAUSE))+geom_line(stat="count",aes(color=PRIM_CONTRIBUTORY_CAUSE))+xlab("Hours")+ylab("Number of Accidents")+ggtitle("Top 3 Primary Causes of Accidents occured in Hours")+labs(color='Primary Causes')
+```
 
 ### Visualizing the Locations of Each Crash Change, Month to Month
 |      To display the location of each crash, we used the ggmap library which uses images of google maps to display a more detailed visual of Chicago. Then using the longitude and latitude of each crash, we place each crash with injury on the map. Next, to make the map more informational, we mapped the color of each point to the month of the year and the size of the point to the “severity” of the crash(number of injuries). Finally, to make each point distinguishable, we used theme elements to change the opacity, color, and border of each point on the infographic.

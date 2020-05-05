@@ -62,6 +62,8 @@ temp%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%summarise(total=sum(INJURIES_FATAL))%
 temp<-crash%>%filter(PRIM_CONTRIBUTORY_CAUSE=="FOLLOWING TOO CLOSELY"|PRIM_CONTRIBUTORY_CAUSE=="FAILING TO YIELD RIGHT-OF-WAY"|PRIM_CONTRIBUTORY_CAUSE=="IMPROPER OVERTAKING/PASSING")
 #temp
 temp%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%ggplot(aes(x=CRASH_HOUR,fill=PRIM_CONTRIBUTORY_CAUSE))+geom_line(stat="count",aes(color=PRIM_CONTRIBUTORY_CAUSE))+xlab("Hours")+ylab("Number of Accidents")+ggtitle("Top 3 Primary Causes of Accidents occured in Hours")+labs(color='Primary Causes')
+
+
 #crash%>%ggplot(aes(x=CRASH_HOUR))+geom_line(stat="count")
 
 #crash%>%group_by(CRASH_MONTH)%>%ggplot(aes(x=reorder(PRIM_CONTRIBUTORY_CAUSE,INJURIES_TOTAL),y=INJURIES_TOTAL))+geom_bar(stat="identity")+coord_flip()+theme(axis.text.y = element_text(size = 6))+xlab("primary cause")+ylab("Total Injuries")+ggtitle("Total Injuries in each primary cause 2016")
