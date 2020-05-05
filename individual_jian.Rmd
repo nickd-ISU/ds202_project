@@ -17,14 +17,16 @@ library(ggmosaic)
 # The percentage of crash type  and report type of data 
 
 crash <- readr::read_csv('crash2016.csv')
+crash1<-crash
 #crash
-
+count(crash)
 
 #temp<-crash%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%summarise(count=n())
 #temp
 
 crash<-crash%>%filter(PRIM_CONTRIBUTORY_CAUSE!="UNABLE TO DETERMINE")
 crash<-crash%>%filter(PRIM_CONTRIBUTORY_CAUSE!="NOT APPLICABLE")
+count(crash)
 unique(crash$PRIM_CONTRIBUTORY_CAUSE)
 crash%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%summarise(total=n())%>%arrange(desc(total))
 
@@ -49,10 +51,11 @@ crash%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%summarise(total=sum(INJURIES_TOTAL))
 ```
 
 ```{r fig.width=12, fig.height=9}
-crash<-crash%>%filter(!is.na(INJURIES_FATAL))
+temp<-crash%>%filter(!is.na(INJURIES_FATAL))
+
 #crash<-crash%>%filter(INJURIES_FATAL>0)
-crash%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%summarise(total=sum(INJURIES_FATAL))%>%arrange(desc(total))
-crash%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%summarise(total=sum(INJURIES_FATAL))%>%ggplot(aes(x=reorder(PRIM_CONTRIBUTORY_CAUSE,total),y=total))+geom_bar(stat="identity")+coord_flip()+theme(axis.text.y = element_text(size = 7))+xlab("Primary Cause")+ylab("Number of Injuries")+ggtitle("Total Fatal Injuries in Primary Causes 2016")
+temp%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%summarise(total=sum(INJURIES_FATAL))%>%arrange(desc(total))
+temp%>%group_by(PRIM_CONTRIBUTORY_CAUSE)%>%summarise(total=sum(INJURIES_FATAL))%>%ggplot(aes(x=reorder(PRIM_CONTRIBUTORY_CAUSE,total),y=total))+geom_bar(stat="identity")+coord_flip()+theme(axis.text.y = element_text(size = 7))+xlab("Primary Cause")+ylab("Number of Injuries")+ggtitle("Total Fatal Injuries in Primary Causes 2016")
 ```
 
 ```{r}
