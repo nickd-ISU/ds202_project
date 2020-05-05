@@ -12,16 +12,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r message=FALSE}
 # Normal libraries
 library(ggplot2)
-theme_set(theme_minimal())
 library(dplyr)
 library(tidyr)
 library(tidyverse)
 # Libraries for mapping
 library(maps)
 library(ggmap)
-library(RColorBrewer)
-library(here)
-library(patchwork)
 # Libraries for interactive map
 library(plotly)
 library(htmlwidgets)
