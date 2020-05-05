@@ -1,0 +1,49 @@
+---
+title: "DS 202 Project Individual"
+author: "Mike Zaino"
+date: "5/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+
+```{r}
+library(tidyverse)
+
+crash <-  read_csv('/Users/TheemikezanilyMac/Documents/School/DS 202/Final Project/ds202_project/traffic-crashes-crashes-1.csv')
+str(crash)
+```
+
+```{r}
+crash2016 <- crash %>% 
+  separate(DATE_POLICE_NOTIFIED, into = c('Date', 'time', 'time2'), sep = ' ') %>% 
+  separate(Date, into = c('Month', 'Day', 'Year'), sep ='/') %>% 
+  filter(Year == 2016)
+
+crash2016$date <- as.Date(with(crash2016, paste(Year, Month, Day,sep="/")), "%Y/%m/%d")
+
+table(crash2016$Month)
+```
+
+```{r}
+crash2016 %>% 
+  group_by(Month, Day, Year) %>% 
+  summarise(n=n()) %>% 
+  arrange(desc(n)) %>% 
+  head(n=15)
+
+crash2016 %>% 
+  filter(Month == 12, Day == 19, Year == 2016)
+
+crash2016 %>% 
+  filter(Month == 12, Day == 20, Year == 2016)
+```
+
+
